@@ -53,7 +53,11 @@ def get_new_tweets(api=None, screen_name=None):
                 
                 timeline.sort(key=lambda x: x.id, reverse=True)
                 for tweet in timeline:
-                    tweet_to_speach(tweet)
+                    try:
+                        tweet_to_speach(tweet)
+                    except Exception as ex:
+                        print("ERROR IN TTS")
+                        print(ex)
                     
                 latest_tweet = max(timeline, key=lambda x: x.id).id
         except:
