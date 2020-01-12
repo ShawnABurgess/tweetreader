@@ -82,6 +82,7 @@ def tweet_to_speach(tweet):
     #Clean up any twitter links
     full_text = re.sub( r"https:\/\/t\.co\/[^\s]+",  "",  tweet.full_text )
 
+    if (full_text.strip() != ""):
     audio_data = text_to_speech.synthesize(
         full_text,
         voice='en-US_MichaelV3Voice',
