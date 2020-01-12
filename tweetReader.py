@@ -33,7 +33,7 @@ def get_new_tweets(api=None, screen_name=None):
             global latest_tweet
 
             print("get new Tweets. Latest_tweet: "+str(latest_tweet))
-            timeline = api.GetUserTimeline(screen_name=screen_name, since_id=latest_tweet, exclude_replies=True, count=200)
+            timeline = api.GetUserTimeline(screen_name=screen_name, since_id=latest_tweet, count=200)
             if timeline:
                 earliest_tweet = min(timeline, key=lambda x: x.id).id
 
@@ -51,7 +51,7 @@ def get_new_tweets(api=None, screen_name=None):
                         timeline += tweets
 
                 
-                timeline.sort(key=lambda x: x.id, reverse=True)
+                timeline.sort(key=lambda x: x.id)
                 for tweet in timeline:
                     try:
                         tweet_to_speach(tweet)
@@ -83,18 +83,18 @@ def tweet_to_speach(tweet):
     full_text = re.sub( r"https:\/\/t\.co\/[^\s]+",  "",  tweet.full_text )
 
     if (full_text.strip() != ""):
-    audio_data = text_to_speech.synthesize(
-        full_text,
-        voice='en-US_MichaelV3Voice',
-        accept='audio/wav'        
-    ).get_result().content
+        audio_data = text_to_speech.synthesize(
+            full_text,
+            voice='en-US_MichaelV3Voice',
+            accept='audio/wav'        
+        ).get_result().content
 
-    # Let everyone know that POTUS is about to talk
-    and_now_POTUS()
+        # Let everyone know that POTUS is about to talk
+        and_now_POTUS()
 
-    # Play the TTS
-    play_obj = sa.play_buffer(audio_data, 1, 2, 22050)
-    play_obj.wait_done()
+        # Play the TTS
+        play_obj = sa.play_buffer(audio_data, 1, 2, 22050)
+        play_obj.wait_done()
 
 def and_now_POTUS():
     wave_obj = sa.WaveObject.from_wave_file("andNowPOTUS.wav")
