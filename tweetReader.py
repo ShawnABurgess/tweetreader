@@ -11,6 +11,8 @@ import json
 import sys
 import threading
 import re
+import pyttsx3
+from random import choice
 from threading import Timer
 from RepeatedTimer import RepeatedTimer
 
@@ -71,30 +73,47 @@ def find_last_tweet(api=None, screen_name=None):
 
 def tweet_to_speach(tweet):
     print("Tweet ID: " + str(tweet.id) + " TEXT: " + tweet.full_text)
-
-    authenticator = IAMAuthenticator(WATSONAPIKEY)
-    text_to_speech = TextToSpeechV1(
-        authenticator=authenticator
-    )
-
-    text_to_speech.set_service_url(WATSONURL)
     
     #Clean up any twitter links
     full_text = re.sub( r"https:\/\/t\.co\/[^\s]+",  "",  tweet.full_text )
 
     if (full_text.strip() != ""):
-        audio_data = text_to_speech.synthesize(
-            full_text,
-            voice='en-US_MichaelV3Voice',
-            accept='audio/wav'        
-        ).get_result().content
+        try:
+            authenticator = IAMAuthenticator(WATSONAPIKEY)
+            text_to_speech = TextToSpeechV1(
+                authenticator=authenticator
+            )
 
-        # Let everyone know that POTUS is about to talk
-        and_now_POTUS()
+            text_to_speech.set_service_url(WATSONURL)
 
-        # Play the TTS
-        play_obj = sa.play_buffer(audio_data, 1, 2, 22050)
-        play_obj.wait_done()
+            audio_data = text_to_speech.synthesize(
+                full_text,
+                voice='en-US_MichaelV3Voice',
+                accept='audio/wav'        
+            ).get_result().content
+
+            # Let everyone know that POTUS is about to talk
+            and_now_POTUS()
+
+            # Play the TTS
+            play_obj = sa.play_buffer(audio_data, 1, 2, 22050)
+            play_obj.wait_done()
+        except:
+            #Wattson is mad, let just run this local
+            engine = pyttsx3.init()
+            rate = engine.getProperty('rate')
+            engine.setProperty('rate', rate-50)
+            
+            voices = engine.getProperty('voices')
+            voice = choice(voices)
+            engine.setProperty('voice', voice.id)
+
+            engine.say(full_text)
+
+            # Let everyone know that POTUS is about to talk
+            and_now_POTUS()
+
+            engine.runAndWait()
 
 def and_now_POTUS():
     wave_obj = sa.WaveObject.from_wave_file("andNowPOTUS.wav")
